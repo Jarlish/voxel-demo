@@ -1,13 +1,18 @@
 package io.github.jarlish.voxeldemo.screen;
 
-import io.github.jarlish.voxeldemo.world.World;
+import io.github.jarlish.voxeldemo.egine.GameEngine;
 
 public class PlayScreen extends BaseScreen {
 
-	private World world;
-	
+	private GameEngine engine;
+
 	public PlayScreen() {
-		world = new World();
-		world.generateWorld();
+		engine = new GameEngine();
+		engine.start();
+	}
+
+	@Override
+	public void hide() {
+		engine.end();
 	}
 }
