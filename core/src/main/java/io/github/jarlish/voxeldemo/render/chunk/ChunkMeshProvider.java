@@ -9,29 +9,28 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import io.github.jarlish.voxeldemo.VoxelDemo;
-import io.github.jarlish.voxeldemo.world.World;
+import io.github.jarlish.voxeldemo.render.WorldRenderer;
 import io.github.jarlish.voxeldemo.world.chunk.Chunk;
 
 public class ChunkMeshProvider implements RenderableProvider {
 
-	private World world;
+	private WorldRenderer worldRenderer;
 	private Material material;
 	private int chunksRendered;
 
-	public ChunkMeshProvider(World world) {
-		this.world = world;
+	public ChunkMeshProvider(WorldRenderer worldRenderer) {
+		this.worldRenderer = worldRenderer;
 		material = new Material(TextureAttribute.createDiffuse(VoxelDemo.terrainTexture));
 	}
 
 	@Override
 	public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
 		chunksRendered = 0;
-		for(Chunk chunk : world.getChunks().values()) {
+		for(Chunk chunk : worldRenderer.getWorld().getChunks().values()) {
 			ChunkMesh chunkMesh = chunk.getChunkMesh();
-			if(chunkMesh.isDirty() || chunkMesh.getSize() == 0) {
+			if(!worldRenderer.isChunkVisible(chunk) || chunkMesh.isDirty() || chunkMesh.getSize() == 0) {
 				continue;
 			}
-
 			Mesh mesh = chunkMesh.getMesh();
 			Renderable renderable = pool.obtain();
 			renderable.material = material;

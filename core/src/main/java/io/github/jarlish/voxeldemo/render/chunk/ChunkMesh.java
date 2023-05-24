@@ -2,7 +2,6 @@ package io.github.jarlish.voxeldemo.render.chunk;
 
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.VertexAttributes;
-
 import io.github.jarlish.voxeldemo.world.World;
 import io.github.jarlish.voxeldemo.world.chunk.Chunk;
 

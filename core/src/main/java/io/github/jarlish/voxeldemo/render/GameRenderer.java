@@ -18,7 +18,7 @@ public class GameRenderer {
 		camera = new VoxelCamera();
 		camera.position.set(5 * Chunk.CHUNK_SIZE, 11 * Chunk.CHUNK_SIZE, 5 * Chunk.CHUNK_SIZE);
 
-		worldRenderer = new WorldRenderer(world);
+		worldRenderer = new WorldRenderer(camera, world);
 		spriteBatch = new SpriteBatch();
 	}
 

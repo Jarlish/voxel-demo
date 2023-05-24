@@ -13,6 +13,7 @@ import io.github.jarlish.voxeldemo.world.chunk.Chunk;
 
 public class WorldRenderer {
 
+	private Camera camera;
 	private World world;
 	private ModelBatch modelBatch;
 	private ChunkMeshProvider chunkMeshProvider;
@@ -20,10 +21,11 @@ public class WorldRenderer {
 	private short[] indices;
 	private VertexAttributes vertexAttributes;
 
-	public WorldRenderer(World world) {
+	public WorldRenderer(Camera camera, World world) {
+		this.camera = camera;
 		this.world = world;
 		modelBatch = new ModelBatch();
-		chunkMeshProvider = new ChunkMeshProvider(world);
+		chunkMeshProvider = new ChunkMeshProvider(this);
 
 		//Vertices
 		this.vertices = new float[ChunkMesh.VERTEX_SIZE * 6 * Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE];
@@ -66,11 +68,22 @@ public class WorldRenderer {
 		modelBatch.end();
 	}
 
+	public boolean isChunkVisible(Chunk chunk) {
+		int chunkWorldX = (chunk.getLocation().x * Chunk.CHUNK_SIZE);
+		int chunkWorldY = (chunk.getLocation().y * Chunk.CHUNK_SIZE);
+		int chunkWorldZ = (chunk.getLocation().z * Chunk.CHUNK_SIZE);
+		return camera.frustum.boundsInFrustum(chunkWorldX + (Chunk.CHUNK_SIZE / 2), chunkWorldY + (Chunk.CHUNK_SIZE / 2), chunkWorldZ + (Chunk.CHUNK_SIZE / 2), (Chunk.CHUNK_SIZE / 2), (Chunk.CHUNK_SIZE / 2), (Chunk.CHUNK_SIZE / 2));
+	}
+
 	public int getChunksLoaded() {
 		return world.getChunks().size();
 	}
-	
+
 	public int getChunksRendered() {
 		return chunkMeshProvider.getChunksRendered();
+	}
+
+	public World getWorld() {
+		return world;
 	}
 }

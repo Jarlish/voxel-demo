@@ -7,7 +7,7 @@ Most features are work in progress.
 - [x] Simplex noise based procedural world generation.
 - [ ] Infinite world generation with chunks.
 - [ ] Support for transparent voxels. 
-- [ ] Frustum culling on chunks.
+- [x] Frustum culling on chunks.
 - [x] Multithreaded chunk data generation.
 - [ ] Multithreaded mesh creation.
 - [ ] Optimized mesh data to reduce memory usage.
