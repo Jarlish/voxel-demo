@@ -42,4 +42,8 @@ public class GameEngine {
 	public void end() {
 		running = false;
 	}
+	
+	public World getWorld() {
+		return world;
+	}
 }

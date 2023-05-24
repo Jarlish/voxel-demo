@@ -2,14 +2,28 @@ package io.github.jarlish.voxeldemo.world.chunk;
 
 import com.badlogic.gdx.utils.Pool.Poolable;
 
+import io.github.jarlish.voxeldemo.render.chunk.ChunkMesh;
+
 public class Chunk implements Poolable {
 
 	public static final int CHUNK_SIZE = 32;
-	
+
+	private ChunkCoordinate location;
 	private byte[][][] voxels;
+	private ChunkMesh chunkMesh;
 	
 	public Chunk() {
+		location = new ChunkCoordinate(0, 0, 0);
 		voxels = new byte[Chunk.CHUNK_SIZE][Chunk.CHUNK_SIZE][Chunk.CHUNK_SIZE];
+		chunkMesh = new ChunkMesh(this);
+	}
+	
+	public ChunkCoordinate getLocation() {
+		return location;
+	}
+	
+	public void setLocation(int x, int y, int z) {
+		location.set(x, y, z);
 	}
 	
 	@Override
@@ -23,5 +37,9 @@ public class Chunk implements Poolable {
 	
 	public void setVoxel(int x, int y, int z, byte voxel) {
 		voxels[x][y][z] = voxel;
+	}
+	
+	public ChunkMesh getChunkMesh() {
+		return chunkMesh;
 	}
 }
