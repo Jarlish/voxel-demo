@@ -1,5 +1,6 @@
 package io.github.jarlish.voxeldemo.render;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.VertexAttribute;
@@ -10,6 +11,7 @@ import io.github.jarlish.voxeldemo.render.chunk.ChunkMesh;
 import io.github.jarlish.voxeldemo.render.chunk.ChunkMeshProvider;
 import io.github.jarlish.voxeldemo.world.World;
 import io.github.jarlish.voxeldemo.world.chunk.Chunk;
+import io.github.jarlish.voxeldemo.world.chunk.ChunkCoordinate;
 
 public class WorldRenderer {
 
@@ -20,6 +22,7 @@ public class WorldRenderer {
 	private float[] vertices;
 	private short[] indices;
 	private VertexAttributes vertexAttributes;
+	private ChunkCoordinate tmp = new ChunkCoordinate(0, 0, 0);
 
 	public WorldRenderer(Camera camera, World world) {
 		this.camera = camera;
@@ -55,9 +58,27 @@ public class WorldRenderer {
 	}
 
 	private void buildChunkMeshes() {
+		ConcurrentHashMap<ChunkCoordinate, Chunk> chunks = world.getChunks();
 		ConcurrentLinkedQueue<Chunk> chunkMeshBuildingQueue = world.getChunkMeshBuildingQueue();
-		for(int i = 0; i < Math.min(5, chunkMeshBuildingQueue.size()); i++) {
+		for(int i = 0; i < Math.min(25, chunkMeshBuildingQueue.size()); i++) {
 			Chunk chunk = chunkMeshBuildingQueue.poll();
+			ChunkCoordinate location = chunk.getLocation();
+
+			Chunk neighbor1 = chunks.get(tmp.set(location.x - 1, location.y, location.z));
+			Chunk neighbor2 = chunks.get(tmp.set(location.x + 1, location.y, location.z));
+			Chunk neighbor3 = chunks.get(tmp.set(location.x, location.y - 1, location.z));
+			Chunk neighbor4 = chunks.get(tmp.set(location.x, location.y + 1, location.z));
+			Chunk neighbor5 = chunks.get(tmp.set(location.x, location.y, location.z - 1));
+			Chunk neighbor6 = chunks.get(tmp.set(location.x, location.y, location.z + 2));
+
+			if(neighbor1 == null || neighbor2 == null || neighbor3 == null || neighbor4 == null || neighbor5 == null || neighbor6 == null) {
+				chunkMeshBuildingQueue.add(chunk);
+				continue;
+			}else if(!neighbor1.isGenerated() || !neighbor2.isGenerated() || !neighbor3.isGenerated() || !neighbor4.isGenerated() || !neighbor5.isGenerated() || !neighbor6.isGenerated()) {
+				chunkMeshBuildingQueue.add(chunk);
+				continue;
+			}
+
 			chunk.getChunkMesh().buildMesh(world, vertices, indices, vertexAttributes);
 		}
 	}

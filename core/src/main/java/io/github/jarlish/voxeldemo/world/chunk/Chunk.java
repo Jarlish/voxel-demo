@@ -10,11 +10,13 @@ public class Chunk implements Poolable {
 	private ChunkCoordinate location;
 	private byte[][][] voxels;
 	private ChunkMesh chunkMesh;
+	private boolean generated;
 
 	public Chunk() {
 		location = new ChunkCoordinate(0, 0, 0);
 		voxels = new byte[Chunk.CHUNK_SIZE][Chunk.CHUNK_SIZE][Chunk.CHUNK_SIZE];
 		chunkMesh = new ChunkMesh(this);
+		generated = false;
 	}
 
 	public ChunkCoordinate getLocation() {
@@ -40,5 +42,13 @@ public class Chunk implements Poolable {
 
 	public ChunkMesh getChunkMesh() {
 		return chunkMesh;
+	}
+
+	public boolean isGenerated() {
+		return generated;
+	}
+
+	public void setGenerated(boolean generated) {
+		this.generated = generated;
 	}
 }

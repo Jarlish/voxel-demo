@@ -13,7 +13,6 @@ public class ChunkMesh {
 	private Mesh mesh;
 	private int size;
 	private boolean dirty;
-	private int currentTexture;
 
 	public ChunkMesh(Chunk chunk) {
 		this.chunk = chunk;
@@ -44,24 +43,23 @@ public class ChunkMesh {
 					if(voxel == 0) {
 						continue;
 					}
-					currentTexture = voxel;
 					if(world.getVoxel(worldX, worldY + 1, worldZ) == 0) {
-						vertexOffset = createTop(worldX, worldY, worldZ, vertices, vertexOffset);
+						vertexOffset = createTop(voxel, worldX, worldY, worldZ, vertices, vertexOffset);
 					}
 					if(world.getVoxel(worldX, worldY - 1, worldZ) == 0) {
-						vertexOffset = createBottom(worldX, worldY, worldZ, vertices, vertexOffset);
+						vertexOffset = createBottom(voxel, worldX, worldY, worldZ, vertices, vertexOffset);
 					}
 					if(world.getVoxel(worldX - 1, worldY, worldZ) == 0) {
-						vertexOffset = createLeft(worldX, worldY, worldZ, vertices, vertexOffset);
+						vertexOffset = createLeft(voxel, worldX, worldY, worldZ, vertices, vertexOffset);
 					}
 					if(world.getVoxel(worldX + 1, worldY, worldZ) == 0) {
-						vertexOffset = createRight(worldX, worldY, worldZ, vertices, vertexOffset);
+						vertexOffset = createRight(voxel, worldX, worldY, worldZ, vertices, vertexOffset);
 					}
 					if(world.getVoxel(worldX, worldY, worldZ - 1) == 0) {
-						vertexOffset = createFront(worldX, worldY, worldZ, vertices, vertexOffset);
+						vertexOffset = createFront(voxel, worldX, worldY, worldZ, vertices, vertexOffset);
 					}
 					if(world.getVoxel(worldX, worldY, worldZ + 1) == 0) {
-						vertexOffset = createBack(worldX, worldY, worldZ, vertices, vertexOffset);
+						vertexOffset = createBack(voxel, worldX, worldY, worldZ, vertices, vertexOffset);
 					}
 				}
 			}
@@ -69,122 +67,122 @@ public class ChunkMesh {
 		return vertexOffset / VERTEX_SIZE;
 	}
 
-	private int createTop(int x, int y, int z, float[] vertices, int vertexOffset) {
+	private int createTop(int texture, int x, int y, int z, float[] vertices, int vertexOffset) {
 		//Top right
 		vertexOffset += addPositionToVertices(x + 1, y + 1, z, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 0, 0, 0, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 0, 0, 0, vertices, vertexOffset);
 
 		//Top left
 		vertexOffset += addPositionToVertices(x, y + 1, z, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 0, 1, 0, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 0, 1, 0, vertices, vertexOffset);
 
 		//Bottom left
 		vertexOffset += addPositionToVertices(x, y + 1, z + 1, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 0, 1, 1, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 0, 1, 1, vertices, vertexOffset);
 
 		//Bottom right
 		vertexOffset += addPositionToVertices(x + 1, y + 1, z + 1, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 0, 0, 1, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 0, 0, 1, vertices, vertexOffset);
 
 		return vertexOffset;
 	}
 
-	private int createBottom(int x, int y, int z, float[] vertices, int vertexOffset) {
+	private int createBottom(int texture, int x, int y, int z, float[] vertices, int vertexOffset) {
 		//Top right
 		vertexOffset += addPositionToVertices(x, y, z, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 5, 0, 0, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 5, 0, 0, vertices, vertexOffset);
 
 		//Top left
 		vertexOffset += addPositionToVertices(x + 1, y, z, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 5, 1, 0, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 5, 1, 0, vertices, vertexOffset);
 
 		//Bottom left
 		vertexOffset += addPositionToVertices(x + 1, y, z + 1, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 5, 1, 1, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 5, 1, 1, vertices, vertexOffset);
 
 		//Bottom right
 		vertexOffset += addPositionToVertices(x, y, z + 1, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 5, 0, 1, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 5, 0, 1, vertices, vertexOffset);
 
 		return vertexOffset;
 	}
 
-	private int createLeft(int x, int y, int z, float[] vertices, int vertexOffset) {
+	private int createLeft(int texture, int x, int y, int z, float[] vertices, int vertexOffset) {
 		//Top right
 		vertexOffset += addPositionToVertices(x, y + 1, z + 1, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 1, 0, 0, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 1, 0, 0, vertices, vertexOffset);
 
 		//Top left
 		vertexOffset += addPositionToVertices(x, y + 1, z, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 1, 1, 0, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 1, 1, 0, vertices, vertexOffset);
 
 		//Bottom left
 		vertexOffset += addPositionToVertices(x, y, z, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 1, 1, 1, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 1, 1, 1, vertices, vertexOffset);
 
 		//Bottom right
 		vertexOffset += addPositionToVertices(x, y, z + 1, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 1, 0, 1, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 1, 0, 1, vertices, vertexOffset);
 
 		return vertexOffset;
 	}
 
-	private int createRight(int x, int y, int z, float[] vertices, int vertexOffset) {
+	private int createRight(int texture, int x, int y, int z, float[] vertices, int vertexOffset) {
 		//Top right
 		vertexOffset += addPositionToVertices(x + 1, y + 1, z, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 2, 0, 0, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 2, 0, 0, vertices, vertexOffset);
 
 		//Top left
 		vertexOffset += addPositionToVertices(x + 1, y + 1, z + 1, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 2, 1, 0, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 2, 1, 0, vertices, vertexOffset);
 
 		//Bottom left
 		vertexOffset += addPositionToVertices(x + 1, y, z + 1, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 2, 1, 1, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 2, 1, 1, vertices, vertexOffset);
 
 		//Bottom right
 		vertexOffset += addPositionToVertices(x + 1, y, z, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 2, 0, 1, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 2, 0, 1, vertices, vertexOffset);
 
 		return vertexOffset;
 	}
 
-	private int createFront(int x, int y, int z, float[] vertices, int vertexOffset) {
+	private int createFront(int texture, int x, int y, int z, float[] vertices, int vertexOffset) {
 		//Bottom right
 		vertexOffset += addPositionToVertices(x + 1, y, z, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 3, 0, 1, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 3, 0, 1, vertices, vertexOffset);
 
 		//Bottom left
 		vertexOffset += addPositionToVertices(x, y, z, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 3, 1, 1, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 3, 1, 1, vertices, vertexOffset);
 
 		//Top left
 		vertexOffset += addPositionToVertices(x, y + 1, z, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 3, 1, 0, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 3, 1, 0, vertices, vertexOffset);
 
 		//Top right
 		vertexOffset += addPositionToVertices(x + 1, y + 1, z, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 3, 0, 0, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 3, 0, 0, vertices, vertexOffset);
 
 		return vertexOffset;
 	}
 
-	private int createBack(int x, int y, int z, float[] vertices, int vertexOffset) {
+	private int createBack(int texture, int x, int y, int z, float[] vertices, int vertexOffset) {
 		//Top right
 		vertexOffset += addPositionToVertices(x + 1, y + 1, z + 1, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 4, 0, 0, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 4, 0, 0, vertices, vertexOffset);
 
 		//Top left
 		vertexOffset += addPositionToVertices(x, y + 1, z + 1, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 4, 1, 0, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 4, 1, 0, vertices, vertexOffset);
 
 		//Bottom left
 		vertexOffset += addPositionToVertices(x, y, z + 1, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 4, 1, 1, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 4, 1, 1, vertices, vertexOffset);
 
 		//Bottom right
 		vertexOffset += addPositionToVertices(x + 1, y, z + 1, vertices, vertexOffset);
-		vertexOffset += addTextureCoordinatesToVertices(currentTexture, 4, 0, 1, vertices, vertexOffset);
+		vertexOffset += addTextureCoordinatesToVertices(texture, 4, 0, 1, vertices, vertexOffset);
 
 		return vertexOffset;
 	}

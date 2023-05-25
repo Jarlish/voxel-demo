@@ -17,7 +17,9 @@ public class World {
 	private ConcurrentLinkedQueue<Chunk> chunkMeshBuildingQueue;
 
 	public World() {
-		heightMap = new Noise(MathUtils.random(Integer.MAX_VALUE - 1), 0.01f, Noise.SIMPLEX, 1, 2.0f, 0.5f);
+		heightMap = new Noise(MathUtils.random(Integer.MAX_VALUE - 1), 0.0025f, Noise.SIMPLEX_FRACTAL, 8, 2.0f, 0.5f);
+		heightMap.setFractalType(Noise.RIDGED_MULTI);
+		heightMap.setFractalGain(2f);
 		chunkPool = new ChunkPool();
 		chunks = new ConcurrentHashMap<ChunkCoordinate, Chunk>();
 		chunkGenerationQueue = new ConcurrentLinkedQueue<Chunk>();
@@ -38,9 +40,9 @@ public class World {
 	}
 
 	private void addChunks() {
-		for(int x = 0; x < 10; x++) {
-			for(int y = 0; y < 10; y++) {
-				for(int z = 0; z < 10; z++) {
+		for(int x = 0; x < 40; x++) {
+			for(int y = 0; y < 5; y++) {
+				for(int z = 0; z < 40; z++) {
 					Chunk chunk = chunkPool.obtain(x, y, z);
 					chunks.put(new ChunkCoordinate(x, y, z), chunk);
 				}
@@ -50,20 +52,33 @@ public class World {
 
 	private void generateChunk(Chunk chunk) {
 		for(int x = 0; x < Chunk.CHUNK_SIZE; x++) {
-			for(int y = 0; y < Chunk.CHUNK_SIZE; y++) {
-				for(int z = 0; z < Chunk.CHUNK_SIZE; z++) {
-					int worldX = (chunk.getLocation().x * Chunk.CHUNK_SIZE) + x;
+			for(int z = 0; z < Chunk.CHUNK_SIZE; z++) {
+				int worldX = (chunk.getLocation().x * Chunk.CHUNK_SIZE) + x;
+				int worldZ = (chunk.getLocation().z * Chunk.CHUNK_SIZE) + z;
+				float height = (heightMap.getConfiguredNoise(worldX, worldZ) + 1f) / 2f;
+				int h = height > 0.5f ? (int) (height * 128) : 64;
+				for(int y = 0; y < Chunk.CHUNK_SIZE; y++) {
 					int worldY = (chunk.getLocation().y * Chunk.CHUNK_SIZE) + y;
-					int worldZ = (chunk.getLocation().z * Chunk.CHUNK_SIZE) + z;
-					float height = heightMap.getConfiguredNoise(worldX, worldY, worldZ);
-					if(height > 0.25f) {
-						chunk.setVoxel(x, y, z, (byte) (2 + MathUtils.random(2)));
-					}else {
-						chunk.setVoxel(x, y, z, (byte) 0);
+					if(worldY < h) {
+						byte voxel = 0;
+						if(worldY < 64) {
+							voxel = 1;
+						}
+						if(worldY >= 64) {
+							voxel = 2;
+						}
+						if(worldY >= 70) {
+							voxel = 3;
+						}
+						if(worldY > 96 - 3 + MathUtils.random(6)) {
+							voxel = 4;
+						}
+						chunk.setVoxel(x, y, z, voxel);
 					}
 				}
 			}
 		}
+		chunk.setGenerated(true);
 	}
 
 	public Chunk getChunk(int chunkX, int chunkY, int chunkZ) {
