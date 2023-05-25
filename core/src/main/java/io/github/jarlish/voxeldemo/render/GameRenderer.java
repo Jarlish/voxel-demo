@@ -37,4 +37,12 @@ public class GameRenderer {
 		spriteBatch.draw(VoxelDemo.crosshairTexture, (Gdx.graphics.getWidth() / 2) - 7, (Gdx.graphics.getHeight() / 2) - 7, 14, 14);
 		spriteBatch.end();
 	}
+
+	public void start() {
+		worldRenderer.start();
+	}
+
+	public void end() {
+		worldRenderer.end();
+	}
 }

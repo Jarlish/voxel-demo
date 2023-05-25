@@ -10,11 +10,14 @@ import make.some.noise.Noise;
 
 public class World {
 
+	public static int WORLD_SIZE = 20;
+	public static int WORLD_DEPTH = 5;
+
 	private Noise heightMap;
 	private ChunkPool chunkPool;
 	private ConcurrentHashMap<ChunkCoordinate, Chunk> chunks;
 	private ConcurrentLinkedQueue<Chunk> chunkGenerationQueue;
-	private ConcurrentLinkedQueue<Chunk> chunkMeshBuildingQueue;
+	private ConcurrentLinkedQueue<Chunk> chunkMeshCreationQueue;
 
 	public World() {
 		heightMap = new Noise(MathUtils.random(Integer.MAX_VALUE - 1), 0.0025f, Noise.SIMPLEX_FRACTAL, 8, 2.0f, 0.5f);
@@ -23,7 +26,7 @@ public class World {
 		chunkPool = new ChunkPool();
 		chunks = new ConcurrentHashMap<ChunkCoordinate, Chunk>();
 		chunkGenerationQueue = new ConcurrentLinkedQueue<Chunk>();
-		chunkMeshBuildingQueue = new ConcurrentLinkedQueue<Chunk>();
+		chunkMeshCreationQueue = new ConcurrentLinkedQueue<Chunk>();
 	}
 
 	public void init() {
@@ -32,17 +35,17 @@ public class World {
 	}
 
 	public void tick() {
-		for(int i = 0; i < Math.min(50, chunkGenerationQueue.size()); i++) {
+		for(int i = 0; i < Math.min(100, chunkGenerationQueue.size()); i++) {
 			Chunk chunk = chunkGenerationQueue.poll();
 			generateChunk(chunk);
-			chunkMeshBuildingQueue.add(chunk);
+			chunkMeshCreationQueue.add(chunk);
 		}
 	}
 
 	private void addChunks() {
-		for(int x = 0; x < 40; x++) {
-			for(int y = 0; y < 5; y++) {
-				for(int z = 0; z < 40; z++) {
+		for(int x = 0; x < WORLD_SIZE; x++) {
+			for(int y = 0; y < WORLD_DEPTH; y++) {
+				for(int z = 0; z < WORLD_SIZE; z++) {
 					Chunk chunk = chunkPool.obtain(x, y, z);
 					chunks.put(new ChunkCoordinate(x, y, z), chunk);
 				}
@@ -106,7 +109,7 @@ public class World {
 		return chunks;
 	}
 
-	public ConcurrentLinkedQueue<Chunk> getChunkMeshBuildingQueue() {
-		return chunkMeshBuildingQueue;
+	public ConcurrentLinkedQueue<Chunk> getChunkMeshCreationQueue() {
+		return chunkMeshCreationQueue;
 	}
 }

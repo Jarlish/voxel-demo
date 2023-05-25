@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.utils.Array;
 import io.github.jarlish.voxeldemo.render.chunk.ChunkMesh;
 import io.github.jarlish.voxeldemo.render.chunk.ChunkMeshProvider;
+import io.github.jarlish.voxeldemo.render.chunk.MeshBuildingThread;
 import io.github.jarlish.voxeldemo.world.World;
 import io.github.jarlish.voxeldemo.world.chunk.Chunk;
 import io.github.jarlish.voxeldemo.world.chunk.ChunkCoordinate;
@@ -22,13 +23,18 @@ public class WorldRenderer {
 	private float[] vertices;
 	private short[] indices;
 	private VertexAttributes vertexAttributes;
-	private ChunkCoordinate tmp = new ChunkCoordinate(0, 0, 0);
+	private ChunkCoordinate tmp;
+
+	private ConcurrentLinkedQueue<Chunk> chunkMeshBuildingQueue;
+	private Thread meshBuildingThread;
+	private boolean running;
 
 	public WorldRenderer(Camera camera, World world) {
 		this.camera = camera;
 		this.world = world;
 		modelBatch = new ModelBatch();
 		chunkMeshProvider = new ChunkMeshProvider(this);
+		tmp = new ChunkCoordinate(0, 0, 0);
 
 		//Vertices
 		this.vertices = new float[ChunkMesh.VERTEX_SIZE * 6 * Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE];
@@ -50,37 +56,56 @@ public class WorldRenderer {
 		attributeArray.add(VertexAttribute.Position());
 		attributeArray.add(VertexAttribute.TexCoords(0));
 		vertexAttributes = new VertexAttributes(attributeArray.toArray(VertexAttribute.class));
+
+		//Mesh building
+		chunkMeshBuildingQueue = new ConcurrentLinkedQueue<Chunk>();
+		meshBuildingThread = new Thread(new MeshBuildingThread(this));
+		running = false;
 	}
 
 	public void render(float delta, Camera camera) {
-		buildChunkMeshes();
+		createChunkMeshes();
 		drawWorld(camera);
 	}
 
-	private void buildChunkMeshes() {
-		ConcurrentHashMap<ChunkCoordinate, Chunk> chunks = world.getChunks();
-		ConcurrentLinkedQueue<Chunk> chunkMeshBuildingQueue = world.getChunkMeshBuildingQueue();
-		for(int i = 0; i < Math.min(25, chunkMeshBuildingQueue.size()); i++) {
-			Chunk chunk = chunkMeshBuildingQueue.poll();
-			ChunkCoordinate location = chunk.getLocation();
-
-			Chunk neighbor1 = chunks.get(tmp.set(location.x - 1, location.y, location.z));
-			Chunk neighbor2 = chunks.get(tmp.set(location.x + 1, location.y, location.z));
-			Chunk neighbor3 = chunks.get(tmp.set(location.x, location.y - 1, location.z));
-			Chunk neighbor4 = chunks.get(tmp.set(location.x, location.y + 1, location.z));
-			Chunk neighbor5 = chunks.get(tmp.set(location.x, location.y, location.z - 1));
-			Chunk neighbor6 = chunks.get(tmp.set(location.x, location.y, location.z + 2));
-
-			if(neighbor1 == null || neighbor2 == null || neighbor3 == null || neighbor4 == null || neighbor5 == null || neighbor6 == null) {
+	private void createChunkMeshes() {
+		ConcurrentLinkedQueue<Chunk> chunkMeshCreationQueue = world.getChunkMeshCreationQueue();
+		for(int i = 0; i < Math.min(200, chunkMeshCreationQueue.size()); i++) {
+			Chunk chunk = chunkMeshCreationQueue.poll();
+			if(chunkNeedsMesh(chunk)) {
+				chunk.getChunkMesh().createMesh(world, vertices, indices, vertexAttributes);
 				chunkMeshBuildingQueue.add(chunk);
-				continue;
-			}else if(!neighbor1.isGenerated() || !neighbor2.isGenerated() || !neighbor3.isGenerated() || !neighbor4.isGenerated() || !neighbor5.isGenerated() || !neighbor6.isGenerated()) {
-				chunkMeshBuildingQueue.add(chunk);
-				continue;
+			}else {
+				chunkMeshCreationQueue.add(chunk);
 			}
-
-			chunk.getChunkMesh().buildMesh(world, vertices, indices, vertexAttributes);
 		}
+	}
+
+	public void buildChunkMeshes() {
+		for(int i = 0; i < Math.min(200, chunkMeshBuildingQueue.size()); i++) {
+			Chunk chunk = chunkMeshBuildingQueue.poll();
+			if(chunkNeedsMesh(chunk)) {
+				chunk.getChunkMesh().buildMesh(world, vertices, indices, vertexAttributes);
+			}else {
+				chunkMeshBuildingQueue.add(chunk);
+			}
+		}
+	}
+
+	private boolean chunkNeedsMesh(Chunk chunk) {
+		ConcurrentHashMap<ChunkCoordinate, Chunk> chunks = world.getChunks();
+		ChunkCoordinate location = chunk.getLocation();
+		for(int x = -1; x <= 1; x++) {
+			for(int y = -1; y <= 1; y++) {
+				for(int z = -1; z <= 1; z++) {
+					Chunk neighbor = chunks.get(tmp.set(location.x + x, location.y + y, location.z + z));
+					if(neighbor == null || !neighbor.isGenerated()) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	private void drawWorld(Camera camera) {
@@ -94,6 +119,19 @@ public class WorldRenderer {
 		int chunkWorldY = (chunk.getLocation().y * Chunk.CHUNK_SIZE);
 		int chunkWorldZ = (chunk.getLocation().z * Chunk.CHUNK_SIZE);
 		return camera.frustum.boundsInFrustum(chunkWorldX + (Chunk.CHUNK_SIZE / 2), chunkWorldY + (Chunk.CHUNK_SIZE / 2), chunkWorldZ + (Chunk.CHUNK_SIZE / 2), (Chunk.CHUNK_SIZE / 2), (Chunk.CHUNK_SIZE / 2), (Chunk.CHUNK_SIZE / 2));
+	}
+
+	public void start() {
+		running = true;
+		meshBuildingThread.start();
+	}
+
+	public void end() {
+		running = false;
+	}
+
+	public boolean isRunning() {
+		return running;
 	}
 
 	public int getChunksLoaded() {

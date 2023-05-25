@@ -19,10 +19,16 @@ public class ChunkMesh {
 		dirty = true;
 	}
 
-	public void buildMesh(World world, float[] vertices, short[] indices, VertexAttributes vertexAttributes) {
+	public void createMesh(World world, float[] vertices, short[] indices, VertexAttributes vertexAttributes) {
 		if(mesh == null) {
 			mesh = new Mesh(true, Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE * VERTEX_SIZE * 5 * 4, Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE * 36 / 3, vertexAttributes);
 			mesh.setIndices(indices);
+		}
+	}
+
+	public void buildMesh(World world, float[] vertices, short[] indices, VertexAttributes vertexAttributes) {
+		if(mesh == null) {
+			return;
 		}
 		int vertexCount = calculateVertices(world, vertices);
 		size = vertexCount / 4 * 6;

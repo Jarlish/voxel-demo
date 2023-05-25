@@ -12,8 +12,9 @@ public class PlayScreen extends BaseScreen {
 		engine = new GameEngine();
 		renderer = new GameRenderer(engine.getWorld());
 		engine.start();
+		renderer.start();
 	}
-	
+
 	@Override
 	public void render(float delta) {
 		renderer.render(delta);
@@ -22,5 +23,6 @@ public class PlayScreen extends BaseScreen {
 	@Override
 	public void hide() {
 		engine.end();
+		renderer.end();
 	}
 }
