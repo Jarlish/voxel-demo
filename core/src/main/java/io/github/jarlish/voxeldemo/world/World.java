@@ -10,8 +10,9 @@ import make.some.noise.Noise;
 
 public class World {
 
-	public static int WORLD_SIZE = 20;
-	public static int WORLD_DEPTH = 5;
+	public static final int WORLD_SIZE = 40;
+	public static final int WORLD_DEPTH = 5;
+	private static final int MAX_CHUNK_GENERATIONS = 100;
 
 	private Noise heightMap;
 	private ChunkPool chunkPool;
@@ -34,8 +35,8 @@ public class World {
 		chunkGenerationQueue.addAll(chunks.values());
 	}
 
-	public void tick() {
-		for(int i = 0; i < Math.min(100, chunkGenerationQueue.size()); i++) {
+	public void generateChunks() {
+		for(int i = 0; i < Math.min(chunkGenerationQueue.size(), MAX_CHUNK_GENERATIONS); i++) {
 			Chunk chunk = chunkGenerationQueue.poll();
 			generateChunk(chunk);
 			chunkMeshCreationQueue.add(chunk);

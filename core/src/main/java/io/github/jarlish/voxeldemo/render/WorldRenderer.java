@@ -16,6 +16,9 @@ import io.github.jarlish.voxeldemo.world.chunk.ChunkCoordinate;
 
 public class WorldRenderer {
 
+	private static final int MAX_MESH_CREATIONS = 100;
+	private static final int MAX_MESH_BUILDS = 100;
+
 	private Camera camera;
 	private World world;
 	private ModelBatch modelBatch;
@@ -70,7 +73,7 @@ public class WorldRenderer {
 
 	private void createChunkMeshes() {
 		ConcurrentLinkedQueue<Chunk> chunkMeshCreationQueue = world.getChunkMeshCreationQueue();
-		for(int i = 0; i < Math.min(200, chunkMeshCreationQueue.size()); i++) {
+		for(int i = 0; i < Math.min(chunkMeshCreationQueue.size(), MAX_MESH_CREATIONS); i++) {
 			Chunk chunk = chunkMeshCreationQueue.poll();
 			if(chunkNeedsMesh(chunk)) {
 				chunk.getChunkMesh().createMesh(world, vertices, indices, vertexAttributes);
@@ -82,7 +85,7 @@ public class WorldRenderer {
 	}
 
 	public void buildChunkMeshes() {
-		for(int i = 0; i < Math.min(200, chunkMeshBuildingQueue.size()); i++) {
+		for(int i = 0; i < Math.min(chunkMeshBuildingQueue.size(), MAX_MESH_BUILDS); i++) {
 			Chunk chunk = chunkMeshBuildingQueue.poll();
 			if(chunkNeedsMesh(chunk)) {
 				chunk.getChunkMesh().buildMesh(world, vertices, indices, vertexAttributes);

@@ -13,7 +13,7 @@ public class ChunkGenerationThread implements Runnable {
 		while(gameEngine.isRunning()) {
 			gameEngine.getWorld().init();
 			while(gameEngine.isRunning()) {
-				gameEngine.getWorld().tick();
+				gameEngine.getWorld().generateChunks();
 			}
 		}
 	}
