@@ -1,6 +1,6 @@
 package io.github.jarlish.voxeldemo.screen;
 
-import io.github.jarlish.voxeldemo.egine.GameEngine;
+import io.github.jarlish.voxeldemo.engine.GameEngine;
 import io.github.jarlish.voxeldemo.render.GameRenderer;
 
 public class PlayScreen extends BaseScreen {

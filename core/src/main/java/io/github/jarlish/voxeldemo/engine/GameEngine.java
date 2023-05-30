@@ -1,4 +1,4 @@
-package io.github.jarlish.voxeldemo.egine;
+package io.github.jarlish.voxeldemo.engine;
 
 import io.github.jarlish.voxeldemo.world.World;
 
