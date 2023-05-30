@@ -120,6 +120,10 @@ public class WorldRenderer {
 		indexBuffer.bind();
 		shader.bind();
 		shader.setUniformMatrix("u_projTrans", camera.combined);
+		shader.setUniformf(shader.getUniformLocation("u_cameraPosition"), camera.position);
+		shader.setUniformf(shader.getUniformLocation("u_fogColor"), GameRenderer.SKY_COLOR);
+		shader.setUniformf(shader.getUniformLocation("u_fogStart"), 200f);
+		shader.setUniformf(shader.getUniformLocation("u_fogEnd"), 500f);
 
 		chunksRendered = 0;
 		for(Chunk chunk : world.getChunkMap().getChunks()) {

@@ -1,6 +1,7 @@
 package io.github.jarlish.voxeldemo.render;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.jarlish.voxeldemo.VoxelDemo;
@@ -9,6 +10,8 @@ import io.github.jarlish.voxeldemo.world.World;
 import io.github.jarlish.voxeldemo.world.chunk.Chunk;
 
 public class GameRenderer {
+
+	public static final Color SKY_COLOR = new Color(0.6f, 0.6f, 1.0f, 1f);
 
 	private VoxelCamera camera;
 	private WorldRenderer worldRenderer;
@@ -24,7 +27,7 @@ public class GameRenderer {
 
 	public void render(float delta) {
 		camera.doInput(delta);
-		ScreenUtils.clear(0.6f, 0.6f, 1.0f, 1f, true);
+		ScreenUtils.clear(SKY_COLOR, true);
 		worldRenderer.render(delta, camera);
 		drawHUD();
 	}

@@ -16,7 +16,7 @@ public class VoxelCamera extends PerspectiveCamera {
 	public VoxelCamera() {
 		super(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		near = 5.0f;
-		far = 500f;
+		far = 1000f;
 		Gdx.input.setCursorCatched(true);
 		Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 	}
