@@ -16,12 +16,11 @@ public class ChunkCoordinate {
 		this.hashCode = Objects.hash(x, y, z);
 	}
 
-	public ChunkCoordinate set(int x, int y, int z) {
+	public void set(int x, int y, int z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.hashCode = Objects.hash(x, y, z);
-		return this;
 	}
 
 	@Override

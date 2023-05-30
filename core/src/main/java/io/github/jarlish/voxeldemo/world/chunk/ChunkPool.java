@@ -9,7 +9,7 @@ public class ChunkPool extends Pool<Chunk> {
 		chunk.setLocation(x, y, z);
 		return chunk;
 	}
-	
+
 	@Override
 	protected Chunk newObject() {
 		return new Chunk();

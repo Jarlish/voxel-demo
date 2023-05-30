@@ -12,11 +12,11 @@ public class VoxelCamera extends PerspectiveCamera {
 	private Vector3 tmp = new Vector3();
 	private Vector3 tmp2 = new Vector3();
 	private Vector3 tmp3 = new Vector3();
-	
+
 	public VoxelCamera() {
 		super(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		near = 0.5f;
-		far = 1000;
+		near = 5.0f;
+		far = 500f;
 		Gdx.input.setCursorCatched(true);
 		Gdx.input.setCursorPosition(Gdx.graphics.getWidth() / 2, Gdx.graphics.getHeight() / 2);
 	}
@@ -26,24 +26,25 @@ public class VoxelCamera extends PerspectiveCamera {
 		float deltaX = 0;
 		float deltaY = 0;
 		float deltaZ = 0;
-		
+
+		boolean fast = Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT);
 		if(Gdx.input.isKeyPressed(Input.Keys.W)) {
-			deltaZ += speed;
+			deltaZ += speed * (fast ? 2 : 1);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.S)) {
-			deltaZ -= speed;
+			deltaZ -= speed * (fast ? 2 : 1);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.A)) {
-			deltaX += speed;
+			deltaX += speed * (fast ? 2 : 1);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.D)) {
-			deltaX -= speed;
+			deltaX -= speed * (fast ? 2 : 1);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-			deltaY -= speed;
+			deltaY -= speed * (fast ? 2 : 1);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-			deltaY += speed;
+			deltaY += speed * (fast ? 2 : 1);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
 			Gdx.app.exit();
@@ -66,7 +67,8 @@ public class VoxelCamera extends PerspectiveCamera {
 		Vector3 movement = cameraHorizontalDirection.scl(deltaZ * delta).add(cameraRight.scl(deltaX * delta));
 		this.translate(movement);
 		this.translate(0, deltaY * delta, 0);
-		
+
+		//Update
 		this.update();
 	}
 }

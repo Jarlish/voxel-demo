@@ -1,7 +1,12 @@
 package io.github.jarlish.voxeldemo.render.chunk;
 
-import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes;
+import com.badlogic.gdx.graphics.glutils.IndexData;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.glutils.VertexBufferObjectWithVAO;
+import com.badlogic.gdx.graphics.glutils.VertexData;
 import io.github.jarlish.voxeldemo.world.World;
 import io.github.jarlish.voxeldemo.world.chunk.Chunk;
 
@@ -10,29 +15,38 @@ public class ChunkMesh {
 	public static final int VERTEX_SIZE = 5;
 
 	private Chunk chunk;
-	private Mesh mesh;
+	private VertexData vertexData;
 	private int size;
 	private boolean dirty;
+	private boolean didFirstRender;
 
 	public ChunkMesh(Chunk chunk) {
 		this.chunk = chunk;
 		dirty = true;
+		didFirstRender = false;
 	}
 
-	public void createMesh(World world, float[] vertices, short[] indices, VertexAttributes vertexAttributes) {
-		if(mesh == null) {
-			mesh = new Mesh(true, Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE * VERTEX_SIZE * 5 * 4, Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE * 36 / 3, vertexAttributes);
-			mesh.setIndices(indices);
+	public void render(ShaderProgram shader, IndexData indexBuffer) {
+		vertexData.bind(shader);
+		indexBuffer.bind();
+		Gdx.gl.glDrawElements(GL20.GL_TRIANGLES, size / 4 * 6, GL20.GL_UNSIGNED_SHORT, 0);
+		vertexData.unbind(shader);
+		didFirstRender = true;
+	}
+
+	public void createMesh(World world, VertexAttributes vertexAttributes) {
+		if(vertexData == null) {
+			vertexData = new VertexBufferObjectWithVAO(false, Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE * Chunk.CHUNK_SIZE, vertexAttributes);
 		}
 	}
 
-	public void buildMesh(World world, float[] vertices, short[] indices, VertexAttributes vertexAttributes) {
-		if(mesh == null) {
+	public void buildMesh(World world, float[] vertices) {
+		if(vertexData == null) {
 			return;
 		}
 		int vertexCount = calculateVertices(world, vertices);
-		size = vertexCount / 4 * 6;
-		mesh.setVertices(vertices, 0, vertexCount * ChunkMesh.VERTEX_SIZE);
+		size = vertexCount;
+		vertexData.setVertices(vertices, 0, vertexCount * VERTEX_SIZE);
 		dirty = false;
 	}
 
@@ -206,15 +220,15 @@ public class ChunkMesh {
 		return 2;
 	}
 
-	public Mesh getMesh() {
-		return mesh;
-	}
-
 	public int getSize() {
 		return size;
 	}
 
 	public boolean isDirty() {
 		return dirty;
+	}
+
+	public boolean didFirstRender() {
+		return didFirstRender;
 	}
 }

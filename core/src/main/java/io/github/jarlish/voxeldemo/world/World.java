@@ -1,11 +1,9 @@
 package io.github.jarlish.voxeldemo.world;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import com.badlogic.gdx.math.MathUtils;
 import io.github.jarlish.voxeldemo.world.chunk.Chunk;
 import io.github.jarlish.voxeldemo.world.chunk.ChunkCoordinate;
-import io.github.jarlish.voxeldemo.world.chunk.ChunkPool;
+import io.github.jarlish.voxeldemo.world.chunk.ChunkMap;
 import make.some.noise.Noise;
 
 public class World {
@@ -15,42 +13,35 @@ public class World {
 	private static final int MAX_CHUNK_GENERATIONS = 100;
 
 	private Noise heightMap;
-	private ChunkPool chunkPool;
-	private ConcurrentHashMap<ChunkCoordinate, Chunk> chunks;
-	private ConcurrentLinkedQueue<Chunk> chunkGenerationQueue;
-	private ConcurrentLinkedQueue<Chunk> chunkMeshCreationQueue;
+	private ChunkMap chunkMap;
 
 	public World() {
 		heightMap = new Noise(MathUtils.random(Integer.MAX_VALUE - 1), 0.0025f, Noise.SIMPLEX_FRACTAL, 8, 2.0f, 0.5f);
 		heightMap.setFractalType(Noise.RIDGED_MULTI);
 		heightMap.setFractalGain(2f);
-		chunkPool = new ChunkPool();
-		chunks = new ConcurrentHashMap<ChunkCoordinate, Chunk>();
-		chunkGenerationQueue = new ConcurrentLinkedQueue<Chunk>();
-		chunkMeshCreationQueue = new ConcurrentLinkedQueue<Chunk>();
+		chunkMap = new ChunkMap();
 	}
 
 	public void init() {
 		addChunks();
-		chunkGenerationQueue.addAll(chunks.values());
-	}
-
-	public void generateChunks() {
-		for(int i = 0; i < Math.min(chunkGenerationQueue.size(), MAX_CHUNK_GENERATIONS); i++) {
-			Chunk chunk = chunkGenerationQueue.poll();
-			generateChunk(chunk);
-			chunkMeshCreationQueue.add(chunk);
-		}
+		chunkMap.generate();
 	}
 
 	private void addChunks() {
 		for(int x = 0; x < WORLD_SIZE; x++) {
 			for(int y = 0; y < WORLD_DEPTH; y++) {
 				for(int z = 0; z < WORLD_SIZE; z++) {
-					Chunk chunk = chunkPool.obtain(x, y, z);
-					chunks.put(new ChunkCoordinate(x, y, z), chunk);
+					chunkMap.addChunk(x, y, z);
 				}
 			}
+		}
+	}
+
+	public void generateChunks() {
+		for(int i = 0; i < Math.min(chunkMap.generationQueueCount(), MAX_CHUNK_GENERATIONS); i++) {
+			Chunk chunk = chunkMap.pollGenertionQueue();
+			generateChunk(chunk);
+			chunkMap.createVertexBuffer(chunk);
 		}
 	}
 
@@ -85,18 +76,13 @@ public class World {
 		chunk.setGenerated(true);
 	}
 
-	public Chunk getChunk(int chunkX, int chunkY, int chunkZ) {
-		ChunkCoordinate chunkLocation = new ChunkCoordinate(chunkX, chunkY, chunkZ);
-		Chunk chunk = chunks.get(chunkLocation);
-		return chunk;
-	}
-
 	public byte getVoxel(int x, int y, int z) {
 		int chunkX = MathUtils.floor((float) x / Chunk.CHUNK_SIZE);
 		int chunkY = MathUtils.floor((float) y / Chunk.CHUNK_SIZE);
 		int chunkZ = MathUtils.floor((float) z / Chunk.CHUNK_SIZE);
 
-		Chunk chunk = getChunk(chunkX, chunkY, chunkZ);
+		ChunkCoordinate location = new ChunkCoordinate(chunkX, chunkY, chunkZ);
+		Chunk chunk = chunkMap.getChunkThreadSafe(location);
 		if(chunk == null) {
 			return 0;
 		}
@@ -106,11 +92,7 @@ public class World {
 		return chunk.getVoxel(x - chunkWorldX, y - chunkWorldY, z - chunkWorldZ);
 	}
 
-	public ConcurrentHashMap<ChunkCoordinate, Chunk> getChunks() {
-		return chunks;
-	}
-
-	public ConcurrentLinkedQueue<Chunk> getChunkMeshCreationQueue() {
-		return chunkMeshCreationQueue;
+	public ChunkMap getChunkMap() {
+		return chunkMap;
 	}
 }
